@@ -1,0 +1,14 @@
+name: Trigger GitLab CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # You can replace this with your branch name
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger GitLab pipeline
+        run: |
+          curl --request POST --form token=glptt-560bc7984db708580805e9118ed6032ade2d5208 --form ref=main https://gitlab.com/api/v4/projects/68652998/trigger/pipeline
