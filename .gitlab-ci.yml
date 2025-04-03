@@ -1,0 +1,37 @@
+stages:
+  - setup
+  - build
+  - test
+  - deploy
+
+setup:
+  stage: setup
+  tags:
+    - self-hosted
+  script:
+    - echo "Setting up environment..."
+    - sudo apt update && sudo apt install -y nodejs npm postgresql-client
+    - node -v && npm -v
+
+build:
+  stage: build
+  tags:
+    - self-hosted
+  script:
+    - cd frontend && npm install && npm run build
+    - cd ../backend && npm install
+
+test:
+  stage: test
+  tags:
+    - self-hosted
+  script:
+    - cd backend && npm test
+
+deploy:
+  stage: deploy
+  tags:
+    - self-hosted
+  script:
+    - echo "Deploying application..."
+    - echo "(Deployment commands go here)"
