@@ -1,0 +1,82 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Trigger the pipeline on push to the 'main' branch
+  pull_request:
+    branches:
+      - main  # Trigger on PR to the 'main' branch
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest  # GitHub-hosted runner (Ubuntu)
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Setup environment
+        run: |
+          sudo apt update
+          sudo apt install -y nodejs npm postgresql-client
+          node -v
+          npm -v
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+          
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm install
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run tests
+        run: |
+          cd backend
+          npm test
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy backend
+        run: |
+          cd backend
+          npm install
+          pm2 stop all || true
+          pm2 delete all || true
+          pm2 start server.js --name backend
+
+      - name: Deploy frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+          sudo rm -rf /var/www/html/*
+          sudo cp -r dist/* /var/www/html/
+
+      - name: Restart services
+        run: |
+          pm2 save
+          echo "Deployment successful!"
