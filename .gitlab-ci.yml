@@ -34,4 +34,23 @@ deploy:
     - self-hosted
   script:
     - echo "Deploying application..."
-    - echo "(Deployment commands go here)"
+    
+    # Stop existing app (if running)
+    - pm2 stop all || true
+    - pm2 delete all || true
+
+    # Deploy Backend
+    - cd backend
+    - npm install
+    - pm2 start server.js --name backend
+
+    # Deploy Frontend
+    - cd ../frontend
+    - npm install
+    - npm run build
+    - sudo rm -rf /var/www/html/*
+    - sudo cp -r dist/* /var/www/html/
+    
+    # Restart services
+    - pm2 save
+    - echo "Deployment successful!"
